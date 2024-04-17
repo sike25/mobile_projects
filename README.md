@@ -1,4 +1,4 @@
-# mobile_projects
+# Mobile Projects
 literally mobile projects.   
 spring 2024.  
 
