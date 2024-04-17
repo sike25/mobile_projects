@@ -1,0 +1,471 @@
+package hu.ait.smartcart.ui.screen
+
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
+import hu.ait.smartcart.R
+import hu.ait.smartcart.data.ShopItem
+import hu.ait.smartcart.data.ShopItemCategory
+import hu.ait.smartcart.data.ShopItemCategoryList
+import hu.ait.smartcart.model.ShopViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShoppingListScreen(
+    shopViewModel: ShopViewModel = hiltViewModel(),
+    onNavigateToSummary: (shopViewModel: ShopViewModel) -> Unit
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val shopItemCategoryList = ShopItemCategoryList()
+    var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    var showSortMenu by remember { mutableStateOf(false) }
+
+    Box {
+        Scaffold (
+            topBar = {
+                TopAppBar(
+                    title = {Text(text = stringResource(R.string.app_name))},
+                    colors = TopAppBarDefaults.topAppBarColors( containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    actions = {
+
+                        IconButton(onClick = { showSortMenu = !showSortMenu }) {
+                            Icon(Icons.Filled.MoreVert, stringResource(R.string.desc_sort_list_button))
+                        }
+
+                        SortDropDownMenu(
+                            showMenu = showSortMenu,
+                            onDismissRequest = { showSortMenu = false },
+                            onSortByName = { shopViewModel.sortShopListByName() },
+                            onSortByPrice = { shopViewModel.sortShopListByPrice() }
+                        )
+
+                        IconButton(onClick = {
+                            coroutineScope.launch {
+                                onNavigateToSummary(shopViewModel)
+                            }
+                        }) {
+                            Icon(Icons.Filled.Info, stringResource(R.string.desc_summary_button))
+                        }
+
+                        IconButton(onClick = {shopViewModel.clearShopList()}) {
+                            Icon(Icons.Filled.Delete, stringResource(R.string.desc_clear_button))
+                        }
+                    }
+                )
+            },
+
+            content = { paddingValues ->
+                Column(modifier = Modifier.padding(paddingValues)) {
+                    ShopListContent(
+                        modifier = Modifier.padding(),
+                        shopViewModel = shopViewModel,
+                        shopItemCategoryList = shopItemCategoryList,
+                    )
+
+                    if (showAddDialog) {
+                        AddNewShopItemDialog(
+                            shopViewModel = shopViewModel,
+                            onDismissRequest = { showAddDialog = false },
+                            shopItemCategoryList = shopItemCategoryList
+                        )
+                    }
+                }
+            }
+        )
+
+        FloatingActionButton(
+            onClick = { showAddDialog = true },
+            modifier = Modifier
+                .padding(20.dp)
+                .align(Alignment.BottomEnd),
+
+        ) {
+            Icon(Icons.Filled.Add, stringResource(R.string.desc_add_to_list_fab))
+        }
+    }
+}
+
+
+
+@Composable
+fun ShopListContent(
+    modifier: Modifier,
+    shopViewModel: ShopViewModel,
+    shopItemCategoryList: ShopItemCategoryList,
+) {
+    var shopItemToEdit: ShopItem? by rememberSaveable { mutableStateOf(null) }
+    var showEditDialog by rememberSaveable { mutableStateOf(false) }
+    val shopList by shopViewModel.shopItems.collectAsState()
+
+    if (shopList.isEmpty()) {
+        Text(text = stringResource(R.string.text_no_items), modifier = Modifier.padding(20.dp))
+    } else {
+        LazyColumn(modifier = modifier.fillMaxSize()) {
+            items(shopList) { it ->
+                ShopItemCard(
+                    shopItem = it,
+                    onCheckChange = { checkValue -> shopViewModel.changeShopItemBoughtState(it, checkValue) },
+                    onRemoveItem = { shopViewModel.removeFromShopList(it)  },
+                    onEditItem = {
+                        shopItemToEdit = it
+                        showEditDialog = true
+                    }
+                )
+            }
+        }
+
+        if (showEditDialog) {
+            AddNewShopItemDialog(
+                shopItemToEdit = shopItemToEdit,
+                shopViewModel = shopViewModel,
+                shopItemCategoryList = shopItemCategoryList) {
+                showEditDialog = false
+            }
+
+        }
+    }
+}
+
+
+
+@Composable
+fun ShopItemCard(
+    shopItem: ShopItem,
+    onCheckChange: (Boolean) -> Unit = {},
+    onRemoveItem: () -> Unit = {},
+    onEditItem: (ShopItem) -> Unit = {}
+) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
+    Card(
+        colors = CardDefaults.cardColors( containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation( defaultElevation = 10.dp),
+        modifier = Modifier
+            .padding(5.dp)
+            .clickable { onEditItem(shopItem) },
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .animateContentSize()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = shopItem.category.getIcon()),
+                    contentDescription = stringResource(R.string.desc_category),
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(end = 10.dp)
+                )
+
+                Column {
+                    Text(shopItem.name, modifier = Modifier.fillMaxWidth(0.6f))
+                    if (expanded) {
+                        Spacer(modifier = Modifier.fillMaxSize(0.6f))
+                        Text(shopItem.description, modifier = Modifier.fillMaxWidth(0.6f), fontSize = 13.sp)
+                        Spacer(modifier = Modifier.fillMaxSize(0.6f))
+                        Text("$ " + shopItem.price.toString(), modifier = Modifier.fillMaxWidth(0.4f), fontSize = 13.sp)
+                    }
+                }
+
+                Row (
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                    Checkbox(
+                        checked = shopItem.bought,
+                        onCheckedChange = { onCheckChange(it) }
+                    )
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.desc_delete),
+                        modifier = Modifier.clickable {
+                            onRemoveItem()
+                        },
+                        tint = Color.Red
+                    )
+
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                            contentDescription = if (expanded) { stringResource(R.string.desc_less) } else { stringResource(R.string.desc_more) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun AddNewShopItemDialog(
+    shopViewModel: ShopViewModel,
+    shopItemToEdit: ShopItem? = null,
+    shopItemCategoryList: ShopItemCategoryList,
+    onDismissRequest: () -> Unit,
+){
+    var shopItemName by rememberSaveable { mutableStateOf(shopItemToEdit?.name?: "") }
+    var shopItemDescription by rememberSaveable { mutableStateOf(shopItemToEdit?.description?: "") }
+    var shopItemPrice by rememberSaveable { mutableStateOf(shopItemToEdit?.price?.toString()?: "") }
+    var shopItemCategory by rememberSaveable { mutableStateOf(shopItemToEdit?.category?: ShopItemCategory.FOOD) }
+    var shopItemBought by rememberSaveable { mutableStateOf(shopItemToEdit?.bought?: false) }
+
+    var nameError by rememberSaveable { mutableStateOf(false) }
+    var descriptionError by rememberSaveable { mutableStateOf(false) }
+    var priceError by rememberSaveable { mutableStateOf(false) }
+
+    fun validateName(text: String) { nameError = text == "" }
+    fun validateDescription(text: String) { descriptionError = text == "" }
+    fun validatePrice(text: String) { priceError = text == "" || !text.all{char -> char.isDigit()} }
+
+    Dialog (onDismissRequest = { onDismissRequest() })
+    {
+        Card ( modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+               shape = RoundedCornerShape(16.dp), )
+        {
+            Column( Modifier.padding(16.dp) )
+            {
+                OutlinedTextField(
+                    value = shopItemName,
+                    onValueChange = { shopItemName = it
+                                      validateName(it) },
+                    label = { Text(text = stringResource(R.string.text_item_name)) },
+                    isError = nameError,
+                    trailingIcon = { if (nameError) Icon(Icons.Filled.Warning, "error", tint = MaterialTheme.colorScheme.error) },
+                )
+                OutlinedTextField(
+                    value = shopItemDescription,
+                    onValueChange = { shopItemDescription = it
+                                      validateDescription(it)},
+                    label = { Text(text = stringResource(R.string.text_item_description)) },
+                    isError = descriptionError,
+                    trailingIcon = { if (descriptionError) Icon(Icons.Filled.Warning, "error", tint = MaterialTheme.colorScheme.error) },
+                )
+                OutlinedTextField(
+                    value = shopItemPrice,
+                    onValueChange = { shopItemPrice = it
+                                      validatePrice(it)},
+                    label = { Text(text = stringResource(R.string.text_item_price)) },
+                    isError = priceError,
+                    trailingIcon = { if (priceError) Icon(Icons.Filled.Warning, "error", tint = MaterialTheme.colorScheme.error) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                )
+
+                SpinnerSample(
+                    shopItemCategoryList.getCategoryList(),
+                    preselected = ShopItemCategory.FOOD.toString(),
+                    onSelectionChanged = {
+                        shopItemCategory = when (it) {
+                            ShopItemCategory.FASHION.toString() -> ShopItemCategory.FASHION
+                            ShopItemCategory.TECH.toString() -> ShopItemCategory.TECH
+                            else -> ShopItemCategory.FOOD
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(checked = shopItemBought, onCheckedChange = { shopItemBought = it })
+                    Text(text = stringResource(R.string.text_bought))
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = {
+                        validateName(shopItemName)
+                        validateDescription(shopItemDescription)
+                        validatePrice(shopItemPrice)
+                        if (!nameError && !descriptionError && !priceError) {
+
+                            if (shopItemToEdit == null) {
+                                shopViewModel.addToShopList(
+                                    ShopItem(
+                                        name = shopItemName,
+                                        description = shopItemDescription,
+                                        price = shopItemPrice.toInt(),
+                                        category = shopItemCategory,
+                                        bought = shopItemBought,
+                                    )
+                                )
+                            }
+                            else {
+                                val editedShopItem = shopItemToEdit.copy(
+                                    name = shopItemName,
+                                    description = shopItemDescription,
+                                    price = shopItemPrice.toInt(),
+                                    category = shopItemCategory,
+                                    bought = shopItemBought,
+                                )
+                                shopViewModel.editShopItem(editedShopItem)
+
+                            }
+                            onDismissRequest()
+                        }
+
+                    }) {
+                        Text(text = stringResource(R.string.text_save))
+                    }
+                    TextButton(onClick = { onDismissRequest() }) {
+                        Text(text = stringResource(R.string.text_cancel))
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun SpinnerSample(
+    list: List<String>,
+    preselected: String,
+    onSelectionChanged: (myData: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var selected by remember { mutableStateOf(preselected) }
+    var expanded by remember { mutableStateOf(false) } // initial value
+
+    OutlinedCard(
+        modifier = modifier.clickable { expanded = !expanded }
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            Text(
+                text = selected,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            Icon(Icons.Outlined.ArrowDropDown, null, modifier = Modifier.padding(8.dp))
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth(0.6f)
+            ) {
+                list.forEach { listEntry ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selected = listEntry
+                            expanded = false
+                            onSelectionChanged(selected)
+                        },
+                        text = {
+                            Text(
+                                text = listEntry,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.Start)
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun SortDropDownMenu(
+    showMenu: Boolean,
+    onDismissRequest: () -> Unit,
+    onSortByName: () -> Unit,
+    onSortByPrice: () -> Unit
+) {
+    DropdownMenu(
+        expanded = showMenu,
+        onDismissRequest = onDismissRequest
+    ) {
+
+        DropdownMenuItem(
+            onClick = {
+                onSortByName()
+                onDismissRequest() },
+            text = {Text(text = stringResource(R.string.text_sort_by_name))}
+        )
+
+        DropdownMenuItem(
+            onClick = {
+                onSortByPrice()
+                onDismissRequest() },
+            text = {Text(text = stringResource(R.string.text_sort_by_price))}
+        )
+
+    }
+}
