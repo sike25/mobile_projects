@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/background_image"
+    tools:context=".MainActivity">
+
+    <hu.ait.minimine.view.MineFieldView
+        android:id="@+id/mineFieldView"
+        android:layout_margin="20dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="15dp"
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/flagModeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+    
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_flag_mode"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:padding="10dp"
+        android:text="@string/button_clear" />
+
+
+</LinearLayout>

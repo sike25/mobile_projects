@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Minimine</string>
+    <string name="button_clear">Reset</string>
+    <string name="snack_not_mine">That is not a mine.</string>
+    <string name="snack_mine">Oops! That was a mine.</string>
+    <string name="snack_lose">%1$s You lose!</string>
+    <string name="snack_win">Woo hoo! You Won!</string>
+    <string name="text_flag_mode">Flag Mode</string>
+</resources>
