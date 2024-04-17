@@ -1,6 +1,4 @@
-# Mobile Projects
-literally mobile projects.   
-spring 2024.  
+# Mobile Projects  
 
 ### Minesweeper
 a minesweeper implementation.
