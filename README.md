@@ -3,7 +3,7 @@
 ### Minesweeper
 a minesweeper implementation.
 
-![screenshot from Minimine]()
+
 
 - If you click on a field in the Flag mode then:    
   o If you flagged a field but there is no mine, the game ends.      
@@ -15,4 +15,6 @@ a minesweeper implementation.
 The recursive property of exposing all safe connected cells when a safe cell is tried is implemented.
 
 ### SmartCart
+[Demo of SmartCart](https://github.com/sike25/mobile_projects/assets/97693483/373df923-2c3c-4483-83bd-5635f7bf6087)
+
 
