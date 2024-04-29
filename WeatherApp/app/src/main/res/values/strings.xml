@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">WeatherApp</string>
+    <string name="desc_add_to_cities_list">add to city list</string>
+    <string name="text_enter_city">Enter City</string>
+    <string name="desc_error">Error</string>
+    <string name="text_save">Save</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="desc_remove_city">remove city</string>
+    <string name="desc_weather_icon">Weather icon</string>
+    <string name="text_fetching_data">Fetching Data</string>
+</resources>

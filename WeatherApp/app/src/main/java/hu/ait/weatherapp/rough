@@ -1,0 +1,34 @@
+The details screen displays the weather information with an icon/image
+that refers to the weather.
+• Icon can be downloaded based on the icon field of the retrieved JSON result (use the Coil
+library, more info in the next Section): https://openweathermap.org/img/w/10d.png
+
+
+
+        Text(text = "Base " + weatherResult.base) // stations
+        Text(text = "Cloud " +  weatherResult.clouds.all.toString()) // 100
+        Text(text = "Cod " +  weatherResult.cod.toString()) // 200
+        Text(text = "Coord Lat " +  weatherResult.coord.lat.toString()) // 42.3584
+        Text(text = "Coord Lon " +  weatherResult.coord.lon.toString()) // -71.0598
+        Text(text = "Dt " + weatherResult.dt.toString()) // 1714347016
+        Text(text = "Id " + weatherResult.id.toString()) // 4930956
+        Text(text = "Main feelsLike " + weatherResult.main.feelsLike.toString()) // 64.96
+        Text(text = "Main temp " + weatherResult.main.temp.toString()) // 65.64
+        Text(text = "Main tempMin " + weatherResult.main.tempMin.toString()) // 57.15
+        Text(text = "Main tempMax " + weatherResult.main.tempMax.toString()) // 69.42
+        Text(text = "Main humidity " + weatherResult.main.humidity.toString()) // 65
+        Text(text = "Main pressure " + weatherResult.main.pressure.toString()) // 1014
+        Text(text = "Name " + weatherResult.name) // Boston
+        Text(text = "Sys country " + weatherResult.sys.country) // US
+        Text(text = "Sys id " + weatherResult.sys.id.toString()) // 2013408
+        Text(text = "Sys sunrise " + weatherResult.sys.sunrise.toString()) // 1714297367
+        Text(text = "Sys sunset " + weatherResult.sys.sunset.toString()) // 1714347616
+        Text(text = "Sys type " + weatherResult.sys.type.toString()) // 2
+        Text(text = "Timezone " + weatherResult.timezone.toString()) // -14400
+        Text(text = "Visibility " + weatherResult.visibility.toString()) // 10000
+        Text(text = "Weather desc " + weatherResult.weather[0].description) // overcast clouds
+        Text(text = "Weather main " + weatherResult.weather[0].main) // Clouds
+        Text(text = "Weather icon " + weatherResult.weather[0].icon) // 04d
+        Text(text = "Weather id " + weatherResult.weather[0].id.toString()) // 804
+        Text(text = "Wind deg " + weatherResult.wind.deg.toString()) // 200
+        Text(text = "Wind speed " + weatherResult.wind.speed.toString()) // 9.22
