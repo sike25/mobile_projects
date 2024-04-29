@@ -11,7 +11,8 @@ The application has two screens, the first screen holds the list of cities and w
 selected its weather details is displayed on a weather details screen. 
 Weather details include description, temperature, pressure, humidity, and windspeed.   
 City location is also displayed in a GoogleMaps Composable.   
-Support for adding and removing cities is implemented.    
+Support for adding and removing cities is implemented.   
+API errors are handled.  
 
 
 ### SmartCart
