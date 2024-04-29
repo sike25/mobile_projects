@@ -1,5 +1,19 @@
 # Mobile Projects  
 
+### Weather App
+[WeatherApp Demo](https://github.com/sike25/mobile_projects/assets/97693483/6ba2c46e-7269-4fac-93da-04345279e04d)  
+
+**Skills Practiced**   
+Retrofit, APIs (GoogleMaps, OpenWeather), Glide/Coil, JSON parsing, HTTP and Network Communication, Compose UI, Lottie Splash Screens.  
+
+**Project Specs**  
+The application has two screens, the first screen holds the list of cities and when a city is
+selected its weather details is displayed on a weather details screen. 
+Weather details include description, temperature, pressure, humidity, and windspeed.   
+City location is also displayed in a GoogleMaps Composable.   
+Support for adding and removing cities is implemented.    
+
+
 ### SmartCart
 [SmartCart Demo](https://github.com/sike25/mobile_projects/assets/97693483/40cc01ba-7570-478f-8243-fad3441acbe4)
 
